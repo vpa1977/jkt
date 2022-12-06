@@ -2,13 +2,16 @@ cmake_minimum_required(VERSION 3.24)
 
 project(jtk)
 
-#add_subdirectory(poco)
+enable_testing()
+
 find_package(OpenSSL REQUIRED)
+find_package(GTest REQUIRED)
 
 add_executable(jkt
     src/main.cpp
-    src/container.cpp)
-message(Poco::Crypto)
+    src/jks.cpp
+    src/util.cpp)
+
 target_include_directories(jkt PUBLIC include/
     )
 
@@ -24,4 +27,11 @@ target_link_libraries(jkt PRIVATE OpenSSL::Crypto)
 
 
 set_property(TARGET jkt PROPERTY CXX_STANDARD 20)
+
+
+add_executable(test-jkt
+   test/test_util.cpp)
+target_link_libraries(test-jkt GTest::gtest GTest::gtest_main)
+add_test(AllTests test-jkt)
+
 

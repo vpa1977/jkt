@@ -1,3 +1,5 @@
+#include "jks.h"
+
 #include <iostream>
 #include <vector>
 #include <span>
@@ -5,12 +7,15 @@
 #include <byteswap.h>
 
 #include <openssl/pem.h>
+#include <openssl/evp.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
 constexpr uint32_t MAGIC = 0xfeedfeed;
 constexpr uint32_t VERSION1 = 0x01;
 constexpr uint32_t VERSION2 = 0x02;
+//constexpr auto PASSWORD_SALT =                       "M    i    g   h     t    y       A    p    h    r    o    d    i    t    e";
+constexpr std::initializer_list<uint8_t> PASSWORD_SALT {77, 105, 103, 104, 116, 121, 32, 65, 112, 104, 114, 111, 100, 105, 116, 101};
 
 /*
 * KEYSTORE FORMAT:
@@ -179,22 +184,89 @@ void parse_kv_pair(FILE *fp, int version)
 	std::wcout << timestamp << std::endl;
 
 	auto privateKeyLen = read<uint32_t>(fp);
-    std::cout << "Private key len is " << privateKeyLen << std::endl;
+	std::cout << "Private key len is " << privateKeyLen << std::endl;
 	std::vector<uint8_t> privateKey(privateKeyLen);
-	fread(privateKey.data(), sizeof(privateKeyLen), 1, fp);
+	fread(privateKey.data(), sizeof(uint8_t), privateKey.size(), fp);
 
 	uint32_t nCertificates = read<uint32_t>(fp);
-    std::cout << "I have " << nCertificates << std::endl;
+	std::cout << "I have " << nCertificates << std::endl;
 	for (auto i = 0; i < nCertificates; ++i) {
-        if (version == 2){
-            auto certType = readUtf(fp);
-            std::wcout << "The cert type is " << certType << std::endl;
-        }
+		if (version == 2) {
+			auto certType = readUtf(fp);
+			std::wcout << "The cert type is " << certType
+				   << std::endl;
+		}
+
+		auto certLen = read<uint32_t>(fp);
+		std::vector<uint8_t> cert(certLen);
+		fread(cert.data(), sizeof(uint8_t), cert.size(), fp);
 	}
 }
 
-void parse_cert_entry(FILE *fp)
+void parse_cert_entry(FILE *fp, uint32_t version)
 {
+	auto alias = readUtf(fp);
+	auto timestamp = read<uint64_t>(fp);
+	if (version == 2) {
+		auto certType = readUtf(fp);
+		std::wcout << "The cert type is " << certType << std::endl;
+	}
+	auto certLen = read<uint32_t>(fp);
+	std::vector<uint8_t> cert(certLen);
+	fread(cert.data(), sizeof(uint8_t), cert.size(), fp);
+}
+
+std::vector<uint8_t> convertToBytes(const char* password) {
+	int i, j;
+	std::vector<uint8_t> passwdBytes(strlen(password)*2);
+	for (i=0, j=0; j<passwdBytes.size(); i++) {
+		passwdBytes[j++] = password[i] >> 8;
+		passwdBytes[j++] = password[i];
+	}
+	return passwdBytes;
+}
+
+
+void read_digest(FILE* fp, size_t offset, const char* password)
+{
+	EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+	unsigned int md_len;
+	if (!EVP_DigestInit(ctx, EVP_sha1()))
+	{
+		std::cout << "Unable to init digest!!!";
+	}
+
+	if (password)
+	{
+		auto passwordBytes = convertToBytes(password);
+		EVP_DigestUpdate(ctx, passwordBytes.data(), passwordBytes.size());
+		EVP_DigestUpdate(ctx, std::data(PASSWORD_SALT), PASSWORD_SALT.size());
+	}
+
+	std::vector<uint8_t> toDigest(offset);
+	fseek(fp, 0, SEEK_SET);
+	fread(toDigest.data(), sizeof(uint8_t), toDigest.size(), fp);
+
+	EVP_DigestUpdate(ctx, toDigest.data(), toDigest.size());
+
+	EVP_DigestFinal(ctx, md_value, &md_len);
+
+	EVP_MD_CTX_free(ctx);
+
+	std::vector<uint8_t> storedDigest(md_len);
+	fread(storedDigest.data(), sizeof(uint8_t), md_len, fp);
+
+	if (memcmp(storedDigest.data(), md_value, md_len))
+	{
+		std::cout << "store was tampered" << std::endl;
+	}
+	else
+	{
+		std::cout << "perfectly good store" << std::endl;
+	}
+
 }
 
 void read_jks(const char *storeLocation, const char *password)
@@ -210,21 +282,17 @@ void read_jks(const char *storeLocation, const char *password)
 
 	std::cout << "Store version is " << version << std::endl;
 
-	uint32_t entries{};
-	fread(&entries, sizeof(entries), 1, fp);
-	entries = bswap_32(entries);
+	uint32_t entries = read<uint32_t>(fp);
 	std::cout << "Store entries is " << entries << std::endl;
 
 	for (int entry = 0; entry < entries; ++entry) {
-		uint32_t tag;
-		fread(&tag, sizeof(tag), 1, fp);
-		tag = bswap_32(tag);
+		uint32_t tag = read<uint32_t>(fp);
 		switch (tag) {
 		case 1:
 			parse_kv_pair(fp, version);
 			break;
 		case 2:
-			parse_cert_entry(fp);
+			parse_cert_entry(fp, version);
 			break;
 		default:
 			std::cout << "Bad tag" << std::endl;
@@ -232,6 +300,7 @@ void read_jks(const char *storeLocation, const char *password)
 		}
 	}
 
+	read_digest(fp, ftell(fp), password);
 //
 //ended by a keyed SHA1 hash (bytes only) of
 // { password + extra data + preceding body }
