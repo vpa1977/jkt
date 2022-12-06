@@ -1,8 +1,8 @@
 #include "util.h"
 
-
-namespace jks{
-    namespace util {
-    }
+namespace jks
+{
+namespace util
+{
 }
-
+}

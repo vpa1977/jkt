@@ -15,7 +15,10 @@ constexpr uint32_t MAGIC = 0xfeedfeed;
 constexpr uint32_t VERSION1 = 0x01;
 constexpr uint32_t VERSION2 = 0x02;
 //constexpr auto PASSWORD_SALT =                       "M    i    g   h     t    y       A    p    h    r    o    d    i    t    e";
-constexpr std::initializer_list<uint8_t> PASSWORD_SALT {77, 105, 103, 104, 116, 121, 32, 65, 112, 104, 114, 111, 100, 105, 116, 101};
+constexpr std::initializer_list<uint8_t> PASSWORD_SALT{ 77,  105, 103, 104,
+							116, 121, 32,  65,
+							112, 104, 114, 111,
+							100, 105, 116, 101 };
 
 /*
 * KEYSTORE FORMAT:
@@ -216,33 +219,33 @@ void parse_cert_entry(FILE *fp, uint32_t version)
 	fread(cert.data(), sizeof(uint8_t), cert.size(), fp);
 }
 
-std::vector<uint8_t> convertToBytes(const char* password) {
+std::vector<uint8_t> convertToBytes(const char *password)
+{
 	int i, j;
-	std::vector<uint8_t> passwdBytes(strlen(password)*2);
-	for (i=0, j=0; j<passwdBytes.size(); i++) {
+	std::vector<uint8_t> passwdBytes(strlen(password) * 2);
+	for (i = 0, j = 0; j < passwdBytes.size(); i++) {
 		passwdBytes[j++] = password[i] >> 8;
 		passwdBytes[j++] = password[i];
 	}
 	return passwdBytes;
 }
 
-
-void read_digest(FILE* fp, size_t offset, const char* password)
+void read_digest(FILE *fp, size_t offset, const char *password)
 {
-	EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+	EVP_MD_CTX *ctx = EVP_MD_CTX_new();
 
 	unsigned char md_value[EVP_MAX_MD_SIZE];
 	unsigned int md_len;
-	if (!EVP_DigestInit(ctx, EVP_sha1()))
-	{
+	if (!EVP_DigestInit(ctx, EVP_sha1())) {
 		std::cout << "Unable to init digest!!!";
 	}
 
-	if (password)
-	{
+	if (password) {
 		auto passwordBytes = convertToBytes(password);
-		EVP_DigestUpdate(ctx, passwordBytes.data(), passwordBytes.size());
-		EVP_DigestUpdate(ctx, std::data(PASSWORD_SALT), PASSWORD_SALT.size());
+		EVP_DigestUpdate(ctx, passwordBytes.data(),
+				 passwordBytes.size());
+		EVP_DigestUpdate(ctx, std::data(PASSWORD_SALT),
+				 PASSWORD_SALT.size());
 	}
 
 	std::vector<uint8_t> toDigest(offset);
@@ -258,15 +261,11 @@ void read_digest(FILE* fp, size_t offset, const char* password)
 	std::vector<uint8_t> storedDigest(md_len);
 	fread(storedDigest.data(), sizeof(uint8_t), md_len, fp);
 
-	if (memcmp(storedDigest.data(), md_value, md_len))
-	{
+	if (memcmp(storedDigest.data(), md_value, md_len)) {
 		std::cout << "store was tampered" << std::endl;
-	}
-	else
-	{
+	} else {
 		std::cout << "perfectly good store" << std::endl;
 	}
-
 }
 
 void read_jks(const char *storeLocation, const char *password)
