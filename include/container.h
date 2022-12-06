@@ -1,4 +1,4 @@
 #pragma once
 
 
-void OpenContainer();
+void read_jks(const char* storeLocation, const char* password);
