@@ -91,12 +91,12 @@ namespace jks
 
 void JKSStore::TrustedCertificate::Read(std::istream &is, uint32_t version)
 {
-	m_alias = util::read_utf(is);
+	m_alias = util::ReadUTF(is);
 
 	// timestamp is in milliseconds
 	m_timestampMs = read<uint64_t>(is);
 	if (version == 2) {
-		m_certificate.m_type = util::read_utf(is);
+		m_certificate.m_type = util::ReadUTF(is);
 	}
 	auto certLen = read<uint32_t>(is);
 	m_certificate.m_data.resize(certLen);
@@ -107,12 +107,12 @@ void JKSStore::TrustedCertificate::Read(std::istream &is, uint32_t version)
 void JKSStore::TrustedCertificate::Write(std::ostream &os,
 					 uint32_t version) const
 {
-	util::write_utf(os, m_alias);
+	util::WriteUTF(os, m_alias);
 	write(os, m_timestampMs);
 
 	// timestamp is in milliseconds
 	if (version == 2) {
-		util::write_utf(os, m_certificate.m_type);
+		util::WriteUTF(os, m_certificate.m_type);
 	}
 	write<uint32_t>(os, m_certificate.m_data.size());
 	os.write(reinterpret_cast<const char *>(m_certificate.m_data.data()),
@@ -121,7 +121,7 @@ void JKSStore::TrustedCertificate::Write(std::ostream &os,
 
 void JKSStore::KeyEntry::Read(std::istream &is, uint32_t version)
 {
-	m_alias = util::read_utf(is);
+	m_alias = util::ReadUTF(is);
 
 	// timestamp is in milliseconds
 	m_timestampMs = read<uint64_t>(is);
@@ -135,7 +135,7 @@ void JKSStore::KeyEntry::Read(std::istream &is, uint32_t version)
 	for (auto i = 0; i < nCertificates; ++i) {
 		Certificate cert;
 		if (version == 2) {
-			cert.m_type = util::read_utf(is);
+			cert.m_type = util::ReadUTF(is);
 		}
 		auto certLen = read<uint32_t>(is);
 		cert.m_data.resize(certLen);
@@ -147,7 +147,7 @@ void JKSStore::KeyEntry::Read(std::istream &is, uint32_t version)
 
 void JKSStore::KeyEntry::Write(std::ostream &os, uint32_t version) const
 {
-	util::write_utf(os, m_alias);
+	util::WriteUTF(os, m_alias);
 
 	// timestamp is in milliseconds
 	write(os, m_timestampMs);
@@ -159,7 +159,7 @@ void JKSStore::KeyEntry::Write(std::ostream &os, uint32_t version) const
 	write<uint32_t>(os, m_certificateChain.size());
 	for (const auto &cert : m_certificateChain) {
 		if (version == 2) {
-			util::write_utf(os, cert.m_type);
+			util::WriteUTF(os, cert.m_type);
 		}
 		write<uint32_t>(os, cert.m_data.size());
 		os.write(reinterpret_cast<const char *>(cert.m_data.data()),
@@ -207,8 +207,7 @@ std::istream &operator>>(std::istream &is, JKSStore &store)
 	// will result in runtime exception
 	is.read(reinterpret_cast<char *>(toDigest.data()), toDigest.size());
 
-	auto digest =
-		util::create_jks_digest(toDigest, store.m_password.data());
+	auto digest = util::JKSCreateDigest(toDigest, store.m_password.data());
 	std::vector<uint8_t> expected(digest.size());
 	is.read(reinterpret_cast<char *>(expected.data()), expected.size());
 
@@ -237,8 +236,8 @@ std::ostream &operator<<(std::ostream &output, const JKSStore &store)
 
 	auto toDigest = os.str();
 	uint8_t *digestStart = reinterpret_cast<uint8_t *>(toDigest.data());
-	auto digest = util::create_jks_digest({ digestStart, toDigest.size() },
-					      store.m_password);
+	auto digest = util::JKSCreateDigest({ digestStart, toDigest.size() },
+					    store.m_password);
 
 	output.write(toDigest.data(), toDigest.size());
 	output.write(reinterpret_cast<char *>(digest.data()), digest.size());

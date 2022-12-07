@@ -1,5 +1,5 @@
 /*
- * read_utf/write_utf/convert_to_bytes were copied from java.io.DataInputStream
+ * ReadUTF/WriteUTF/convert_to_bytes were copied from java.io.DataInputStream
  *  and java.io.DataOutputStream classes:
  */
 /*
@@ -51,8 +51,8 @@ std::vector<uint8_t> convert_to_bytes(const std::u16string &data)
 	return ret;
 }
 
-std::vector<uint8_t> create_jks_digest(std::span<uint8_t> data,
-				       const std::u16string &password)
+std::vector<uint8_t> JKSCreateDigest(std::span<uint8_t> data,
+				     const std::u16string &password)
 {
 	std::string PASSWORD_SALT = "Mighty Aphrodite";
 
@@ -85,7 +85,7 @@ std::vector<uint8_t> create_jks_digest(std::span<uint8_t> data,
 	return ret;
 }
 
-std::u16string read_utf(std::span<uint8_t> input)
+std::u16string ReadUTF(std::span<uint8_t> input)
 {
 	if (input.size() < 3)
 		throw std::runtime_error("buffer too short");
@@ -207,7 +207,7 @@ std::vector<uint8_t> convert_utf(const std::u16string &str)
 	return bytearr;
 }
 
-std::u16string read_utf(std::istream &is)
+std::u16string ReadUTF(std::istream &is)
 {
 	std::vector<uint8_t> input(2);
 	is >> input[0];
@@ -215,10 +215,10 @@ std::u16string read_utf(std::istream &is)
 	uint16_t utfLen = (input[0] << 8) + input[1];
 	input.resize(utfLen + input.size());
 	is.read(reinterpret_cast<char *>(input.data() + 2), utfLen);
-	return read_utf(input);
+	return ReadUTF(input);
 }
 
-void write_utf(std::ostream &os, const std::u16string &data)
+void WriteUTF(std::ostream &os, const std::u16string &data)
 {
 	auto ret = convert_utf(data);
 	os.write(reinterpret_cast<char *>(ret.data()), ret.size());

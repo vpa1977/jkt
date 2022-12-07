@@ -49,6 +49,7 @@ template <Handle T> struct SafeHandle final {
 
 using FileHandle = SafeHandle<FILE *>;
 using EvpMdCtxHandle = SafeHandle<EVP_MD_CTX *>;
+using X509Handle = SafeHandle<X509 *>;
 
 }
 }
