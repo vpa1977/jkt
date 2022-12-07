@@ -8,6 +8,16 @@
 
 using namespace jks::util;
 
+namespace jks
+{
+namespace util
+{
+std::vector<uint8_t> convert_utf(const std::u16string &data);
+std::vector<uint8_t> convert_to_bytes(const char16_t *data);
+std::u16string read_utf(std::span<uint8_t> byteArr);
+}
+}
+
 TEST(jks_util, jks_digest)
 {
 	// GIVEN an arbitrary bytestring
