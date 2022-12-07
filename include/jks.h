@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -8,7 +9,7 @@ namespace jks
 {
 
 constexpr uint32_t MAGIC = 0xfeedfeed;
-constexpr auto DEFAULT_CERTIFICATE_TYPE = u"X509";
+constexpr auto DEFAULT_CERTIFICATE_TYPE = u"X.509";
 
 class JKSStore final {
     public:
@@ -16,6 +17,15 @@ class JKSStore final {
 		: m_password(password){};
 	void EmplaceTrustedCertificate(const std::u16string &alias,
 				       std::vector<uint8_t> &data);
+
+	std::vector<uint8_t>
+	GetTrustedCertificate(const std::u16string &alias) const
+	{
+		auto where = m_certificates.find(alias);
+		if (where == m_certificates.end())
+			throw std::runtime_error("unable to find alias");
+		return where->second.m_certificate.m_data;
+	}
 
     private:
 	friend std::istream &operator>>(std::istream &is, JKSStore &store);

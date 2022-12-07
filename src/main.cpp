@@ -20,9 +20,7 @@ void Usage()
 
 void ReadStore(jks::JKSStore &store, const char *from)
 {
-	std::ifstream storeStream(
-		"/home/vladimirp/personal-projects/jkt/store/here",
-		std::ios::in | std::ios::binary);
+	std::ifstream storeStream(from, std::ios::in | std::ios::binary);
 	if (!storeStream)
 		throw std::runtime_error("unable to open a file");
 	storeStream >> store;

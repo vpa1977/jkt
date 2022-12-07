@@ -33,7 +33,9 @@ add_executable(test-jkt
     src/safehandle.cpp
     src/jks_util.cpp
     src/x509.cpp
-    test/test_jks_util.cpp)
+    src/jks.cpp
+    test/test_jks_util.cpp
+    test/test_cert_data.cpp)
 target_include_directories(test-jkt PUBLIC include/
     )
 target_link_libraries(test-jkt PRIVATE GTest::gtest GTest::gtest_main)
@@ -44,4 +46,5 @@ set_property(TARGET test-jkt PROPERTY CXX_STANDARD 20)
 
 add_test(AllTests test-jkt)
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/files DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test/)
 
