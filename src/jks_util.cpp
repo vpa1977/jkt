@@ -1,5 +1,5 @@
 /*
- * ReadUTF/WriteUTF/convert_to_bytes were copied from java.io.DataInputStream
+ * ReadUTF/WriteUTF/ConvertToBytes were copied from java.io.DataInputStream
  *  and java.io.DataOutputStream classes:
  */
 /*
@@ -40,7 +40,7 @@ namespace jks
 namespace util
 {
 
-std::vector<uint8_t> convert_to_bytes(const std::u16string &data)
+std::vector<uint8_t> ConvertToBytes(const std::u16string &data)
 {
 	const auto size = data.size();
 	std::vector<uint8_t> ret(size * 2);
@@ -62,7 +62,7 @@ std::vector<uint8_t> JKSCreateDigest(std::span<uint8_t> data,
 		throw std::runtime_error("Unable to init sha1 digest");
 
 	if (!password.empty()) {
-		auto passwordBytes = convert_to_bytes(password);
+		auto passwordBytes = ConvertToBytes(password);
 		if (!EVP_DigestUpdate(ctx, passwordBytes.data(),
 				      passwordBytes.size()))
 			throw std::runtime_error("Unable to hash password");
@@ -165,7 +165,7 @@ std::u16string ReadUTF(std::span<uint8_t> input)
 	return charArr;
 }
 
-std::vector<uint8_t> convert_utf(const std::u16string &str)
+std::vector<uint8_t> ConvertUTF(const std::u16string &str)
 {
 	auto strlen = str.size();
 	auto utflen = strlen;
@@ -220,7 +220,7 @@ std::u16string ReadUTF(std::istream &is)
 
 void WriteUTF(std::ostream &os, const std::u16string &data)
 {
-	auto ret = convert_utf(data);
+	auto ret = ConvertUTF(data);
 	os.write(reinterpret_cast<char *>(ret.data()), ret.size());
 }
 

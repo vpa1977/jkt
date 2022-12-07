@@ -12,8 +12,8 @@ namespace jks
 {
 namespace util
 {
-std::vector<uint8_t> convert_utf(const std::u16string &data);
-std::vector<uint8_t> convert_to_bytes(const char16_t *data);
+std::vector<uint8_t> ConvertUTF(const std::u16string &data);
+std::vector<uint8_t> ConvertToBytes(const char16_t *data);
 std::u16string ReadUTF(std::span<uint8_t> byteArr);
 }
 }
@@ -35,7 +35,7 @@ TEST(jks_util, read_WriteUTF_ascii)
 	// GIVEN an arbitrary U16 string with ASCII symbols
 	auto str = u"123";
 	// WHEN string is converted to bytes
-	auto ret = convert_utf(str);
+	auto ret = ConvertUTF(str);
 	// AND back
 	auto converted = ReadUTF(ret);
 	// THEN string matches the original
@@ -47,7 +47,7 @@ TEST(jks_util, read_WriteUTF)
 	// GIVEN an arbitrary U16 string with 3 byte symbols
 	auto str = u"這是一個中文短語";
 	// WHEN string is converted to bytes
-	auto ret = convert_utf(str);
+	auto ret = ConvertUTF(str);
 	// AND back
 	auto converted = ReadUTF(ret);
 	// THEN string matches the original
