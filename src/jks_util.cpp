@@ -61,7 +61,7 @@ std::vector<uint8_t> create_jks_digest(std::span<uint8_t> data,
 	if (!EVP_DigestInit(ctx, EVP_sha1()))
 		throw std::runtime_error("Unable to init sha1 digest");
 
-	if (password) {
+	if (!password.empty()) {
 		auto passwordBytes = convert_to_bytes(password);
 		if (!EVP_DigestUpdate(ctx, passwordBytes.data(),
 				      passwordBytes.size()))
