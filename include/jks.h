@@ -30,7 +30,7 @@ class JKSStore final {
 
 	struct KeyEntry final {
 		void Read(std::istream &, uint32_t version);
-		void Write(std::ostream &, uint32_t version);
+		void Write(std::ostream &, uint32_t version) const;
 
 		std::u16string m_alias;
 		uint64_t m_timestampMs;
@@ -39,7 +39,7 @@ class JKSStore final {
 	};
 	struct TrustedCertificate final {
 		void Read(std::istream &, uint32_t version);
-		void Write(std::ostream &, uint32_t version);
+		void Write(std::ostream &, uint32_t version) const;
 
 		std::u16string m_alias;
 		uint64_t m_timestampMs;

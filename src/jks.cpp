@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <span>
+#include <sstream>
 
 #include <byteswap.h>
 
@@ -68,6 +69,25 @@ template <typename T> T read(std::istream &is)
 #endif
 }
 
+template <typename T> void write(std::ostream &os, const T buf)
+{
+	T ret;
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+	if constexpr (sizeof(T) == 2)
+		ret = bswap_16(buf);
+	else if constexpr (sizeof(T) == 4)
+		ret = bswap_32(buf);
+	else if constexpr (sizeof(T) == 8)
+		ret = bswap_64(buf);
+	else
+		static_assert(sizeof(T) == 0,
+			      "Unsupported template parameter size");
+#else
+	ret = buf;
+#endif
+	os.write(reinterpret_cast<char *>(&ret), sizeof(T));
+}
+
 }
 
 namespace jks
@@ -86,6 +106,21 @@ void JKSStore::TrustedCertificate::Read(std::istream &is, uint32_t version)
 	m_certificate.m_data.resize(certLen);
 	is.read(reinterpret_cast<char *>(m_certificate.m_data.data()),
 		m_certificate.m_data.size());
+}
+
+void JKSStore::TrustedCertificate::Write(std::ostream &os,
+					 uint32_t version) const
+{
+	util::write_utf(os, m_alias);
+	write(os, m_timestampMs);
+
+	// timestamp is in milliseconds
+	if (version == 2) {
+		util::write_utf(os, m_certificate.m_type);
+	}
+	write<uint32_t>(os, m_certificate.m_data.size());
+	os.write(reinterpret_cast<const char *>(m_certificate.m_data.data()),
+		 m_certificate.m_data.size());
 }
 
 void JKSStore::KeyEntry::Read(std::istream &is, uint32_t version)
@@ -111,6 +146,28 @@ void JKSStore::KeyEntry::Read(std::istream &is, uint32_t version)
 		is.read(reinterpret_cast<char *>(cert.m_data.data()),
 			cert.m_data.size());
 		m_certificateChain.emplace_back(cert);
+	}
+}
+
+void JKSStore::KeyEntry::Write(std::ostream &os, uint32_t version) const
+{
+	util::write_utf(os, m_alias);
+
+	// timestamp is in milliseconds
+	write(os, m_timestampMs);
+
+	write<uint32_t>(os, m_encryptedKey.size());
+	os.write(reinterpret_cast<const char *>(m_encryptedKey.data()),
+		 m_encryptedKey.size());
+
+	write<uint32_t>(os, m_certificateChain.size());
+	for (const auto &cert : m_certificateChain) {
+		if (version == 2) {
+			util::write_utf(os, cert.m_type);
+		}
+		write<uint32_t>(os, cert.m_data.size());
+		os.write(reinterpret_cast<const char *>(cert.m_data.data()),
+			 cert.m_data.size());
 	}
 }
 
@@ -149,7 +206,6 @@ std::istream &operator>>(std::istream &is, JKSStore &store)
 	auto pos = is.tellg();
 	is.seekg(0, is.beg);
 	std::vector<uint8_t> toDigest(pos);
-	pos = is.tellg();
 
 	// not checking return value, as failure to obtain correct digest
 	// will result in runtime exception
@@ -165,9 +221,33 @@ std::istream &operator>>(std::istream &is, JKSStore &store)
 	return is;
 }
 
-std::ostream &operator<<(std::ostream &os, const JKSStore &store)
+std::ostream &operator<<(std::ostream &output, const JKSStore &store)
 {
-	return os;
+	std::ostringstream os;
+	write(os, MAGIC);
+	write(os, store.m_version);
+	auto recordCount = store.m_keys.size() + store.m_certificates.size();
+	write<uint32_t>(os, recordCount);
+
+	for (const auto &[_, value] : store.m_keys) {
+		write<uint32_t>(os, 1);
+		value.Write(os, store.m_version);
+	}
+
+	for (const auto &[_, value] : store.m_certificates) {
+		write<uint32_t>(os, 2);
+		value.Write(os, store.m_version);
+	}
+
+	auto toDigest = os.str();
+	uint8_t *digestStart = reinterpret_cast<uint8_t *>(toDigest.data());
+	auto digest = util::create_jks_digest({ digestStart, toDigest.size() },
+					      store.m_password);
+
+	output.write(toDigest.data(), toDigest.size());
+	output.write(reinterpret_cast<char *>(digest.data()), digest.size());
+
+	return output;
 }
 
 }
