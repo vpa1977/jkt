@@ -96,7 +96,7 @@ PenaltyReturnTypeOnItsOwnLine: 60
 
 PointerAlignment: Right
 ReflowComments: false
-SortIncludes: false
+SortIncludes: true
 SortUsingDeclarations: false
 SpaceAfterCStyleCast: false
 SpaceAfterTemplateKeyword: true
@@ -112,6 +112,6 @@ SpacesInContainerLiterals: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard: Cpp03
+Standard: Latest
 TabWidth: 8
 UseTab: Always
