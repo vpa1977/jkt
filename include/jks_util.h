@@ -1,9 +1,9 @@
 #pragma once
 #include <concepts>
-#include <span>
-#include <vector>
-#include <string>
 #include <istream>
+#include <span>
+#include <string>
+#include <vector>
 
 namespace jks
 {

@@ -1,20 +1,21 @@
 #pragma once
 
-#include <vector>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace jks
 {
 
 constexpr uint32_t MAGIC = 0xfeedfeed;
+constexpr auto DEFAULT_CERTIFICATE_TYPE = u"X509";
 
 class JKSStore final {
     public:
 	JKSStore(const std::u16string &password)
 		: m_password(password){};
-	void Load();
-	void Save();
+	void EmplaceTrustedCertificate(const std::u16string &alias,
+				       std::vector<uint8_t> &data);
 
     private:
 	friend std::istream &operator>>(std::istream &is, JKSStore &store);
@@ -24,6 +25,16 @@ class JKSStore final {
 	using CertificateData = std::vector<uint8_t>;
 
 	struct Certificate final {
+		Certificate()
+			: m_type(DEFAULT_CERTIFICATE_TYPE)
+		{
+		}
+		Certificate(const std::u16string &type,
+			    const CertificateData &data)
+			: m_type(type)
+			, m_data(data)
+		{
+		}
 		std::u16string m_type;
 		CertificateData m_data;
 	};

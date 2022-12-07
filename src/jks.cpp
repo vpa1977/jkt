@@ -2,10 +2,11 @@
 
 #include "jks_util.h"
 
+#include <chrono>
 #include <iostream>
-#include <vector>
 #include <span>
 #include <sstream>
+#include <vector>
 
 #include <byteswap.h>
 
@@ -243,6 +244,18 @@ std::ostream &operator<<(std::ostream &output, const JKSStore &store)
 	output.write(reinterpret_cast<char *>(digest.data()), digest.size());
 
 	return output;
+}
+
+void JKSStore::EmplaceTrustedCertificate(const std::u16string &alias,
+					 std::vector<uint8_t> &data)
+{
+	using namespace std::chrono;
+	milliseconds ms = duration_cast<milliseconds>(
+		system_clock::now().time_since_epoch());
+	TrustedCertificate cert{ alias,
+				 static_cast<uint64_t>(ms.count()),
+				 { DEFAULT_CERTIFICATE_TYPE, data } };
+	m_certificates.emplace(alias, cert);
 }
 
 }
