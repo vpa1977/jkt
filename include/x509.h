@@ -1,11 +1,14 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 namespace jks
 {
 namespace util
 {
 
-std::vector<uint8_t> get_der(const std::string &file);
+std::vector<uint8_t> ReadDER(const std::string &file);
 
 }
 }

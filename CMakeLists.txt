@@ -11,7 +11,8 @@ add_executable(jkt
     src/main.cpp
     src/safehandle.cpp
     src/jks.cpp
-    src/jks_util.cpp)
+    src/jks_util.cpp
+    src/x509.cpp)
 
 target_include_directories(jkt PUBLIC include/
     )
@@ -31,6 +32,7 @@ set_property(TARGET jkt PROPERTY CXX_STANDARD 20)
 add_executable(test-jkt
     src/safehandle.cpp
     src/jks_util.cpp
+    src/x509.cpp
     test/test_jks_util.cpp)
 target_include_directories(test-jkt PUBLIC include/
     )
