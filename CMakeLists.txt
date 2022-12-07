@@ -11,7 +11,7 @@ add_executable(jkt
     src/main.cpp
     src/safehandle.cpp
     src/jks.cpp
-    src/util.cpp)
+    src/jks_util.cpp)
 
 target_include_directories(jkt PUBLIC include/
     )
@@ -30,11 +30,14 @@ set_property(TARGET jkt PROPERTY CXX_STANDARD 20)
 
 add_executable(test-jkt
     src/safehandle.cpp
-    src/util.cpp
-    test/test_util.cpp)
+    src/jks_util.cpp
+    test/test_jks_util.cpp)
 target_include_directories(test-jkt PUBLIC include/
     )
-target_link_libraries(test-jkt GTest::gtest GTest::gtest_main)
+target_link_libraries(test-jkt PRIVATE GTest::gtest GTest::gtest_main)
+target_link_libraries(test-jkt PRIVATE OpenSSL::SSL)
+target_link_libraries(test-jkt PRIVATE OpenSSL::Crypto)
+
 set_property(TARGET test-jkt PROPERTY CXX_STANDARD 20)
 
 add_test(AllTests test-jkt)

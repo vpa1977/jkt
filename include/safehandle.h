@@ -1,6 +1,7 @@
 #pragma once
 #include <concepts>
 #include <stdio.h> // for FILE
+#include <openssl/evp.h> // EVP_MD_CTX
 
 namespace jks
 {
@@ -9,6 +10,7 @@ namespace util
 
 // RAII wrapper for handles
 template <typename T> concept Handle = std::is_pointer_v<T>;
+template <class...> constexpr bool always_false = false; // for static assert
 template <Handle T> struct SafeHandle final {
 	explicit SafeHandle(T handle)
 		: m_handle(handle)
@@ -44,6 +46,7 @@ template <Handle T> struct SafeHandle final {
 };
 
 using FileHandle = SafeHandle<FILE *>;
+using EvpHandle = SafeHandle<EVP_MD_CTX *>;
 
 }
 }
