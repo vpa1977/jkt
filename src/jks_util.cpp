@@ -40,24 +40,19 @@ namespace jks
 namespace util
 {
 
-std::vector<uint8_t> convert_to_bytes(const char16_t *data)
+std::vector<uint8_t> convert_to_bytes(const std::u16string &data)
 {
-	const auto size = std::char_traits<char16_t>::length(data);
+	const auto size = data.size();
 	std::vector<uint8_t> ret(size * 2);
 	for (int i = 0, j = 0; i < size; i++) {
 		ret[j++] = data[i] >> 8;
 		ret[j++] = data[i];
 	}
 	return ret;
-
-	std::vector<uint8_t> passwdBytes(size * sizeof(char16_t));
-	const uint8_t *pStart = reinterpret_cast<const uint8_t *>(data);
-	std::copy(pStart, pStart + passwdBytes.size(), passwdBytes.begin());
-	return passwdBytes;
 }
 
 std::vector<uint8_t> create_jks_digest(std::span<uint8_t> data,
-				       const char16_t *password)
+				       const std::u16string &password)
 {
 	std::string PASSWORD_SALT = "Mighty Aphrodite";
 
@@ -170,7 +165,7 @@ std::u16string read_utf(std::span<uint8_t> input)
 	return charArr;
 }
 
-std::vector<uint8_t> write_utf(std::u16string &str)
+std::vector<uint8_t> convert_utf(const std::u16string &str)
 {
 	auto strlen = str.size();
 	auto utflen = strlen;
@@ -221,6 +216,12 @@ std::u16string read_utf(std::istream &is)
 	input.resize(utfLen + input.size());
 	is.read(reinterpret_cast<char *>(input.data() + 2), utfLen);
 	return read_utf(input);
+}
+
+void write_utf(std::ostream &os, const std::u16string &data)
+{
+	auto ret = convert_utf(data);
+	os.write(reinterpret_cast<char *>(ret.data()), ret.size());
 }
 
 }
