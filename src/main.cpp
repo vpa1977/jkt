@@ -9,7 +9,8 @@
 int main(int argc, char **argv)
 {
 	// convert utf8 -> utf16
-	std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> convert;
+	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+		convert;
 	auto ret = convert.from_bytes(argv[1]);
 
 	printf("jkt - manage java keystore\n");

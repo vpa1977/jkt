@@ -14,11 +14,6 @@
 constexpr uint32_t MAGIC = 0xfeedfeed;
 constexpr uint32_t VERSION1 = 0x01;
 constexpr uint32_t VERSION2 = 0x02;
-//constexpr auto PASSWORD_SALT =                       "M    i    g   h     t    y       A    p    h    r    o    d    i    t    e";
-constexpr std::initializer_list<uint8_t> PASSWORD_SALT{ 77,  105, 103, 104,
-							116, 121, 32,  65,
-							112, 104, 114, 111,
-							100, 105, 116, 101 };
 
 /*
 * KEYSTORE FORMAT:
@@ -244,8 +239,8 @@ void read_digest(FILE *fp, size_t offset, const char *password)
 		auto passwordBytes = convertToBytes(password);
 		EVP_DigestUpdate(ctx, passwordBytes.data(),
 				 passwordBytes.size());
-		EVP_DigestUpdate(ctx, std::data(PASSWORD_SALT),
-				 PASSWORD_SALT.size());
+		//EVP_DigestUpdate(ctx, std::data(PASSWORD_SALT),
+		//			 PASSWORD_SALT.size());
 	}
 
 	std::vector<uint8_t> toDigest(offset);
