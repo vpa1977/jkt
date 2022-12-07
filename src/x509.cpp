@@ -12,8 +12,6 @@ namespace jks
 namespace util
 {
 
-using X509Handle = SafeHandle<X509 *>;
-
 std::vector<uint8_t> ReadDER(const std::string &filename)
 {
 	FileHandle fp(fopen(filename.c_str(), "r"));
