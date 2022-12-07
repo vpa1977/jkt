@@ -12,6 +12,7 @@ add_executable(jkt
     src/safehandle.cpp
     src/jks.cpp
     src/jks_util.cpp
+    src/pkcs12.cpp
     src/x509.cpp)
 
 target_include_directories(jkt PUBLIC include/
@@ -34,8 +35,10 @@ add_executable(test-jkt
     src/jks_util.cpp
     src/x509.cpp
     src/jks.cpp
+    src/pkcs12.cpp
     test/test_jks_util.cpp
-    test/test_cert_data.cpp)
+    test/test_cert_data.cpp
+    test/test_pkcs12.cpp)
 target_include_directories(test-jkt PUBLIC include/
     )
 target_link_libraries(test-jkt PRIVATE GTest::gtest GTest::gtest_main)
