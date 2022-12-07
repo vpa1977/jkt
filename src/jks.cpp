@@ -9,11 +9,6 @@
 
 #include <byteswap.h>
 
-#include <openssl/pem.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-
 constexpr uint32_t VERSION1 = 0x01;
 constexpr uint32_t VERSION2 = 0x02;
 
@@ -250,34 +245,4 @@ std::ostream &operator<<(std::ostream &output, const JKSStore &store)
 	return output;
 }
 
-}
-
-// release X509 structure with X509_free()
-X509 *read_certificate(const char *pem)
-{
-	X509 *ret = NULL;
-	FILE *fp = fopen(pem, "r");
-	if (!fp)
-		return ret;
-
-	ret = PEM_read_X509(fp, NULL, NULL, NULL);
-	fclose(fp);
-	return ret;
-}
-
-X509 *read_certificate_from_data(std::span<unsigned char> data)
-{
-	const auto *pStart = data.data();
-	return d2i_X509(NULL, &pStart, data.size());
-}
-
-std::vector<uint8_t> get_der(X509 *cert)
-{
-	const auto len = i2d_X509(cert, nullptr);
-	if (len == 0)
-		return {};
-	std::vector<unsigned char> ret(len);
-	auto *pData = ret.data();
-	i2d_X509(cert, &pData);
-	return ret;
 }
