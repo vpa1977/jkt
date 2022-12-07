@@ -43,6 +43,13 @@ namespace util
 std::vector<uint8_t> convert_to_bytes(const char16_t *data)
 {
 	const auto size = std::char_traits<char16_t>::length(data);
+	std::vector<uint8_t> ret(size * 2);
+	for (int i = 0, j = 0; i < size; i++) {
+		ret[j++] = data[i] >> 8;
+		ret[j++] = data[i];
+	}
+	return ret;
+
 	std::vector<uint8_t> passwdBytes(size * sizeof(char16_t));
 	const uint8_t *pStart = reinterpret_cast<const uint8_t *>(data);
 	std::copy(pStart, pStart + passwdBytes.size(), passwdBytes.begin());

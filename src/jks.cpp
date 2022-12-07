@@ -52,7 +52,7 @@ namespace
 template <typename T> T read(std::istream &is)
 {
 	T buf;
-	is >> buf;
+	is.read(reinterpret_cast<char *>(&buf), sizeof(T));
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	if constexpr (sizeof(T) == 2)
 		return bswap_16(buf);
@@ -149,6 +149,7 @@ std::istream &operator>>(std::istream &is, JKSStore &store)
 	auto pos = is.tellg();
 	is.seekg(0, is.beg);
 	std::vector<uint8_t> toDigest(pos);
+	pos = is.tellg();
 
 	// not checking return value, as failure to obtain correct digest
 	// will result in runtime exception

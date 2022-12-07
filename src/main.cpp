@@ -20,7 +20,9 @@ int main(int argc, char **argv)
 
 	std::ifstream storeStream(
 		"/home/vladimirp/personal-projects/jkt/store/here",
-		std::ios::binary);
+		std::ios::in | std::ios::binary);
+	if (!storeStream)
+		throw std::runtime_error("unable to open a file");
 
 	JKSStore store(password);
 	storeStream >> store;
