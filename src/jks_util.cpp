@@ -205,5 +205,16 @@ std::vector<uint8_t> write_utf(std::u16string &str)
 	return bytearr;
 }
 
+std::u16string read_utf(std::istream &is)
+{
+	std::vector<uint8_t> input(2);
+	is >> input[0];
+	is >> input[1];
+	uint16_t utfLen = (input[0] << 8) + input[1];
+	input.resize(utfLen + input.size());
+	is.read(reinterpret_cast<char *>(input.data() + 2), utfLen);
+	return read_utf(input);
+}
+
 }
 }

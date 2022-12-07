@@ -2,25 +2,26 @@
 #include "jks_util.h"
 #include "safehandle.h"
 #include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <locale>
 #include <codecvt>
 
 int main(int argc, char **argv)
 {
 	// convert utf8 -> utf16
+
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
 		convert;
-	auto ret = convert.from_bytes(argv[1]);
+	auto password = convert.from_bytes("123123");
 
-	printf("jkt - manage java keystore\n");
+	std::cout << "jkt - manage java keystore\n" << std::endl;
+	using namespace jks;
 
-	using namespace jks::util;
+	std::ifstream storeStream(
+		"/home/vladimirp/personal-projects/jkt/store/here",
+		std::ios::binary);
 
-	FileHandle file(fopen(
-		"/home/vladimirp/personal-projects/jkt/store/here", "rb"));
-
-	fread(nullptr, 1, 1, file);
-
-	read_jks("/home/vladimirp/personal-projects/jkt/store/here", "123123");
+	JKSStore store(password);
+	storeStream >> store;
 }
