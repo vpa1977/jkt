@@ -83,8 +83,14 @@ std::vector<uint8_t> create_jks_digest(std::span<uint8_t> data,
 	return ret;
 }
 
-std::u16string read_utf(std::span<uint8_t> byteArr, size_t utfLen)
+std::u16string read_utf(std::span<uint8_t> input)
 {
+	if (input.size() < 3)
+		throw std::runtime_error("buffer too short");
+
+	uint16_t utfLen = (input[0] << 8) + input[1];
+	std::span<uint8_t> byteArr(input.begin() + 2, input.size() - 2);
+
 	std::u16string charArr;
 	charArr.resize(utfLen);
 
@@ -93,11 +99,11 @@ std::u16string read_utf(std::span<uint8_t> byteArr, size_t utfLen)
 	int chararr_count = 0;
 
 	while (count < utfLen) {
-		c = (int)byteArr[count] & 0xff;
+		c = byteArr[count] & 0xff;
 		if (c > 127)
 			break;
 		count++;
-		charArr[chararr_count++] = (char)c;
+		charArr[chararr_count++] = c;
 	}
 
 	while (count < utfLen) {
@@ -128,7 +134,7 @@ std::u16string read_utf(std::span<uint8_t> byteArr, size_t utfLen)
 				throw std::runtime_error(
 					"malformed input around byte ");
 			charArr[chararr_count++] =
-				(char)(((c & 0x1F) << 6) | (char2 & 0x3F));
+				(((c & 0x1F) << 6) | (char2 & 0x3F));
 		} break;
 		case 14: {
 			/* 1110 xxxx  10xx xxxx  10xx xxxx */
@@ -143,9 +149,8 @@ std::u16string read_utf(std::span<uint8_t> byteArr, size_t utfLen)
 				throw std::runtime_error(
 					"malformed input around byte ");
 			charArr[chararr_count++] =
-				(char)(((c & 0x0F) << 12) |
-				       ((char2 & 0x3F) << 6) |
-				       ((char3 & 0x3F) << 0));
+				(((c & 0x0F) << 12) | ((char2 & 0x3F) << 6) |
+				 ((char3 & 0x3F) << 0));
 		} break;
 		default:
 			/* 10xx xxxx,  1111 xxxx */
@@ -154,6 +159,7 @@ std::u16string read_utf(std::span<uint8_t> byteArr, size_t utfLen)
 		}
 	}
 	// The number of chars produced may be less than utfLen
+	charArr.resize(chararr_count);
 	return charArr;
 }
 

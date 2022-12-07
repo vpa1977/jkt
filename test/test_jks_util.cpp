@@ -28,7 +28,7 @@ TEST(jks_util, read_write_utf_ascii)
 		utf16conv;
 	auto str = utf16conv.from_bytes("123");
 	auto ret = write_utf(str);
-	auto converted = read_utf(ret, str.size());
+	auto converted = read_utf(ret);
 	ASSERT_EQ(str, converted);
 }
 
@@ -39,6 +39,6 @@ TEST(jks_util, read_write_utf)
 	// using chineese to test unicode conversion
 	auto str = utf16conv.from_bytes("這是一個中文短語");
 	auto ret = write_utf(str);
-	auto converted = read_utf(ret, str.size());
+	auto converted = read_utf(ret);
 	ASSERT_EQ(str, converted);
 }

@@ -15,7 +15,7 @@ std::vector<uint8_t> create_jks_digest(std::span<uint8_t> data,
 std::vector<uint8_t> convert_to_bytes(const char16_t *data);
 
 // read/write utilities for aliases
-std::u16string read_utf(std::span<uint8_t> byteArr, size_t utfLen);
+std::u16string read_utf(std::span<uint8_t> byteArr);
 std::vector<uint8_t> write_utf(std::u16string &data);
 
 }
