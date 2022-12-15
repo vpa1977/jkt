@@ -24,5 +24,11 @@ template <> void SafeHandle<x509_st *>::release(x509_st *x)
 		X509_free(x);
 }
 
+template <> void SafeHandle<PKCS12 *>::release(PKCS12 *x)
+{
+	if (x != nullptr)
+		PKCS12_free(x);
+}
+
 }
 }

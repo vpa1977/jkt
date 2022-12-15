@@ -1,6 +1,7 @@
 #pragma once
 #include <concepts>
 #include <openssl/evp.h> // EVP_MD_CTX
+#include <openssl/pkcs12.h> // PKCS12
 #include <openssl/x509.h> // X509
 #include <stdio.h> // for FILE
 
@@ -42,6 +43,11 @@ template <Handle T> struct SafeHandle final {
 		return m_handle;
 	}
 
+	const T raw() const noexcept
+	{
+		return m_handle;
+	}
+
 	void release(T t);
 
 	T m_handle;
@@ -50,6 +56,7 @@ template <Handle T> struct SafeHandle final {
 using FileHandle = SafeHandle<FILE *>;
 using EvpMdCtxHandle = SafeHandle<EVP_MD_CTX *>;
 using X509Handle = SafeHandle<X509 *>;
+using PKCS12Handle = SafeHandle<PKCS12 *>;
 
 }
 }
