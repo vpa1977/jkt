@@ -13,13 +13,6 @@
 
 using namespace jks;
 
-// todo proper usage
-void Usage()
-{
-	std::cout << "jkt <store-file> <store-password> <alias> <pem>"
-		  << std::endl;
-}
-
 void ReadStore(jks::JKSStore &store, const char *from)
 {
 	std::ifstream storeStream(from, std::ios::in | std::ios::binary);
@@ -28,27 +21,31 @@ void ReadStore(jks::JKSStore &store, const char *from)
 	storeStream >> store;
 }
 
+std::u16string ConvertU16(const char *text)
+{
+	if (text == nullptr)
+		return {};
+	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+		convert;
+	return convert.from_bytes(text);
+}
+
 // arguments
 const char *argp_program_version = "jkt 1.0";
 const char *argp_program_bug_address = "<vpa1977@gmail.com>";
 
-/* Program documentation. */
 static char doc[] =
 	"jkt -- Java Keystore certificate Tool. Add or update certificate in Java keystore";
 
-/* The options we understand. */
 static struct argp_option options[] = { { "password", 'p', "PASSWORD", 0,
 					  "Java keystore password" },
 					{ 0 } };
 
-/* Used by main to communicate with parse_opt. */
 struct arguments {
 	char *args[3];
 	char *password;
-	bool pcks12;
 };
 
-/* Parse a single option. */
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
 	arguments *args = static_cast<arguments *>(state->input);
@@ -74,15 +71,6 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
 static char args_doc[] = "KEYSTORE ALIAS PEM-CERTIFICATE";
 static struct argp argp = { options, parse_opt, args_doc, doc };
-
-std::u16string ConvertU16(const char *text)
-{
-	if (text == nullptr)
-		return {};
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
-		convert;
-	return convert.from_bytes(text);
-}
 
 int main(int argc, char **argv)
 {
