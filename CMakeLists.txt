@@ -37,7 +37,7 @@ add_executable(test-jkt
     src/jks.cpp
     src/pkcs12.cpp
     test/test_jks_util.cpp
-    test/test_cert_data.cpp
+    test/test_jks_cert_data.cpp
     test/test_pkcs12.cpp)
 target_include_directories(test-jkt PUBLIC include/
     )

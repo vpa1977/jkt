@@ -10,7 +10,7 @@
 using namespace jks::util;
 using namespace jks;
 
-TEST(cert_data, store_contains_der)
+TEST(jks_cert_data, store_contains_der)
 {
 	// GIVEN a JKS store with a single certificate is loaded
 	JKSStore store(u"123123");
@@ -33,7 +33,7 @@ TEST(cert_data, store_contains_der)
 	X509_free(pCert);
 }
 
-TEST(cert_data, pem_file_can_be_read)
+TEST(jks_cert_data, pem_file_can_be_read)
 {
 	// WHEN der is read from the PEM file
 	auto data = ReadDER("test/files/globaltrust.pem");
@@ -51,7 +51,7 @@ TEST(cert_data, pem_file_can_be_read)
 	X509_free(pCert);
 }
 
-TEST(cert_data, certificate_can_be_imported)
+TEST(jks_cert_data, certificate_can_be_imported)
 {
 	// GIVEN a trust store is loaded
 	JKSStore store(u"123123");
