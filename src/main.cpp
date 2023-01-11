@@ -1,6 +1,7 @@
 
 #include "jks.h"
 #include "jks_util.h"
+#include "pkcs12.h"
 #include "safehandle.h"
 #include "x509.h"
 
@@ -86,16 +87,23 @@ int main(int argc, char **argv)
 	try {
 		JKSStore store(ConvertU16(storePassword));
 
-		ReadStore(store, storeFile);
+		try {
+			ReadStore(store, storeFile);
+			auto certificate = jks::util::ReadDER(pemToImport);
+			store.EmplaceTrustedCertificate(ConvertU16(alias),
+							certificate);
+			// write the store
+			std::ofstream otherStoreStream(
+				storeFile, std::ios::out | std::ios::binary);
+			otherStoreStream << store;
+			return;
+		} catch (const NotJKSStore &) {
+		}
 
-		auto certificate = jks::util::ReadDER(pemToImport);
-
-		store.EmplaceTrustedCertificate(ConvertU16(alias), certificate);
-
-		// write the store
-		std::ofstream otherStoreStream(
-			storeFile, std::ios::out | std::ios::binary);
-		otherStoreStream << store;
+		std::cout << "Not Java keystore format, trying pkcs12"
+			  << std::endl;
+		PKCS12Store::Replace(storeFile, storePassword, alias,
+				     pemToImport, storeFile);
 
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << '\n';

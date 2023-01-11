@@ -172,7 +172,7 @@ std::istream &operator>>(std::istream &is, JKSStore &store)
 	uint32_t magic = read<uint32_t>(is);
 
 	if (magic != jks::MAGIC) {
-		throw std::runtime_error("Not a JKS store");
+		throw NotJKSStore();
 	}
 	uint32_t version = read<uint32_t>(is);
 	store.m_version = version;

@@ -62,18 +62,27 @@ void WriteOutput(STACK_OF(PKCS7) * safes, const std::string &password,
 	i2d_PKCS12_fp(fp, newP12);
 }
 
+PKCS12 *ReadStore(const std::string &file)
+{
+	FileHandle fp(fopen(file.c_str(), "rb"));
+	if (fp == nullptr)
+		return nullptr;
+	return d2i_PKCS12_fp(fp, nullptr);
+}
+
 bool Replace(const std::string &file, const std::string &password,
 	     const std::string &alias, const std::string &pem,
 	     const std::string &output)
 {
-	FileHandle fp(fopen(file.c_str(), "rb"));
-	PKCS12Handle p12(d2i_PKCS12_fp(fp, nullptr));
+	PKCS12Handle p12(ReadStore(file));
+	if (p12 == nullptr)
+		throw std::runtime_error("unable to read keystore");
 	SafeHandle<STACK_OF(PKCS7) *> safes(PKCS12_unpack_authsafes(p12));
 	bool validPassword = true;
 	bool macPresent = PKCS12_mac_present(p12);
 	if (macPresent) {
 		if (!PKCS12_verify_mac(p12, password.c_str(), -1)) {
-			throw std::runtime_error("Invalid password");
+			throw std::runtime_error("invalid password");
 		}
 	}
 	bool updated = false;

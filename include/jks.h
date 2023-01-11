@@ -11,6 +11,14 @@ namespace jks
 constexpr uint32_t MAGIC = 0xfeedfeed;
 constexpr auto DEFAULT_CERTIFICATE_TYPE = u"X.509";
 
+class NotJKSStore final : public std::runtime_error {
+    public:
+	NotJKSStore()
+		: std::runtime_error("not jks store")
+	{
+	}
+};
+
 class JKSStore final {
     public:
 	JKSStore(const std::u16string &password)
