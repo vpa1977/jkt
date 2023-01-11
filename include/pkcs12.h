@@ -2,8 +2,9 @@
 
 #include <string>
 
-namespace PCKS12Store
+namespace PKCS12Store
 {
-void Replace(const char *file, const std::string &password,
-	     const std::string &alias, const char *pem);
+bool Replace(const std::string &file, const std::string &password,
+	     const std::string &alias, const std::string &pem,
+	     const std::string &output);
 }
