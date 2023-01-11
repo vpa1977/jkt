@@ -38,7 +38,8 @@ add_executable(test-jkt
     src/pkcs12.cpp
     test/test_jks_util.cpp
     test/test_jks_cert_data.cpp
-    test/test_pkcs12.cpp)
+    test/test_pkcs12.cpp
+    test/test_pkcs12_store.cpp)
 target_include_directories(test-jkt PUBLIC include/
     )
 target_link_libraries(test-jkt PRIVATE GTest::gtest GTest::gtest_main)
