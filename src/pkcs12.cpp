@@ -36,7 +36,7 @@ void Replace(const char *file, const std::string &password,
 			throw std::runtime_error("Invalid password");
 		}
 	}
-	std::vector<PKCS12_SAFEBAG *> toDelete;
+	std::vector<PKCS7 *> toDelete;
 	for (int i = 0; i < sk_PKCS7_num(safes); ++i) {
 		auto *p7 = sk_PKCS7_value(safes, i);
 		SafeHandle<STACK_OF(PKCS12_SAFEBAG) *> bags(

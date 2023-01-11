@@ -35,7 +35,7 @@ template <> void SafeHandle<PKCS12 *>::release(PKCS12 *x)
 template <> void SafeHandle<STACK_OF(PKCS7) *>::release(STACK_OF(PKCS7) * x)
 {
 	if (x != nullptr)
-		sk_PKCS7_pop_free(safes, PKCS7_free);
+		sk_PKCS7_pop_free(x, PKCS7_free);
 }
 
 template <>
@@ -43,7 +43,7 @@ void SafeHandle<STACK_OF(PKCS12_SAFEBAG) *>::release(STACK_OF(PKCS12_SAFEBAG) *
 						     x)
 {
 	if (x != nullptr)
-		sk_PKCS12_SAFEBAG_pop_free(bags, PKCS12_SAFEBAG_free);
+		sk_PKCS12_SAFEBAG_pop_free(x, PKCS12_SAFEBAG_free);
 }
 
 }
