@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 			std::ofstream otherStoreStream(
 				storeFile, std::ios::out | std::ios::binary);
 			otherStoreStream << store;
-			return;
+			return 0;
 		} catch (const NotJKSStore &) {
 		}
 
