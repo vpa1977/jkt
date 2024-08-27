@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <concepts>
 #include <openssl/evp.h> // EVP_MD_CTX
 #include <openssl/pkcs12.h> // PKCS12

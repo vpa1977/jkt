@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <concepts>
 #include <istream>
 #include <span>
